@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Dự Đoán Tài/Xỉu AI</title>
+  <style>
+    body {
+      background: #101820;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+    .box {
+      background: #1f2d3d;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      min-width: 340px;
+      box-shadow: 0 0 15px #00ffc3;
+    }
+    .box h2 { color: #00ffc3; }
+    .data { margin: 10px 0; font-size: 18px; }
+    #status { margin-top: 15px; font-style: italic; color: #ccc; }
+    .highlight { font-weight: bold; }
+    .tai { color: #ff4b4b; }  /* Đỏ */
+    .xiu { color: #4bd865; }  /* Xanh */
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Dự Đoán AI Tài/Xỉu</h2>
+  <div class="data" id="phien">🎲 Phiên: ...</div>
+  <div class="data" id="tong">🧮 Tổng: ...</div>
+  <div class="data" id="ketqua">✅ Kết quả: ...</div>
+  <div class="data" id="du_doan">🤖 AI dự đoán: ...</div>
+  <div class="data" id="tincay">📊 Độ tin cậy: ...</div>
+  <div class="data" id="tile">📈 Đúng/Sai: ...</div>
+  <div class="data" id="phanTich">🧠 Phân tích: ...</div>
+  <div id="status">⏳ Đang lấy dữ liệu...</div>
+</div>
+
+<script>
+  async function taiDuDoan() {
+    try {
+      const res = await fetch("/api/du-doan");
+      const data = await res.json();
+
+      const prediction = data.prediction;
+      const icon = prediction === "Tài" ? "🔥" : "❄️";
+      const colorClass = prediction === "Tài" ? "tai" : "xiu";
+
+      document.getElementById("phien").innerText = `🎲 Phiên: ${data.Phien}`;
+      document.getElementById("tong").innerText = `🧮 Tổng: ${data.Tong}`;
+      document.getElementById("ketqua").innerText = `✅ Kết quả: ${data.Ket_qua}`;
+      document.getElementById("du_doan").innerHTML =
+        `🤖 AI dự đoán phiên ${data.Next_phien}: <span class="highlight ${colorClass}">${prediction}</span>`;
+      document.getElementById("tincay").innerText = `📊 Độ tin cậy: ${data.tincay}`;
+      document.getElementById("tile").innerText = `📈 Đúng: ${data.Dudoan_dung} | Sai: ${data.Dudoan_sai}`;
+
+      const rules = data.expert_votes || [];
+      const html = rules.map(rule => `• ${rule}`).join("<br>");
+      document.getElementById("phanTich").innerHTML = `🧠 Phân tích:<br>${html}`;
+
+      document.getElementById("status").innerText = `✅ Đã cập nhật lúc ${new Date().toLocaleTimeString()}`;
+    } catch (err) {
+      document.getElementById("status").innerText = "❌ Lỗi lấy dữ liệu từ server.";
+    }
+  }
+
+  taiDuDoan();
+  setInterval(taiDuDoan, 5000);
+</script>
+
+</body>
+</html>
